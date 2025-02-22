@@ -31,14 +31,24 @@ class MemberController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:225',
-            'role' => 'required|string|max:225',
+            'role' => 'required|in:backend,frontend,UI/UX',
         ]);
 
         //custom validation
-        if($validator->fails()) {
+        if ($validator->fails()) {
+            $errors = $validator->errors();
+            $roleError = $errors->first('role');
+    
+            if ($roleError) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "'role' must be one of the following: backend, frontend, UI/UX.",
+                ], 422);
+            }
+    
             return response()->json([
-                'message'=>'Invalid input',
-                'errors'=> $validator->errors(),
+                'status' => 'error',
+                'message' => $errors->first(),
             ], 422);
         }
 
